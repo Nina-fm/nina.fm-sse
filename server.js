@@ -63,7 +63,6 @@ const updateAirTime = async () => {
   const { schedulerTime, ...response } = data;
   if (!isDeepEqual(response, airTimeData)) {
     airTimeData = response;
-    // console.log("update airTimeData");
     return true;
   }
   return false;
@@ -75,7 +74,7 @@ const updateIceCast = async () => {
 
   if (!isDeepEqual(response, iceCastData)) {
     iceCastData = response;
-    // console.log("update iceCastData");
+    await updateAirTime();
 
     return true;
   }
@@ -87,11 +86,13 @@ const sendEventsToAll = () => {
   clients.forEach((client) => client.response.write(getResponse()));
 };
 
-setInterval(async () => {
-  const updateAT = await updateAirTime();
+const updateAll = async () => {
   const updateIC = await updateIceCast();
-  if (updateAT || updateIC) sendEventsToAll();
-}, STREAM_API_REFRESH_TIME);
+  if (updateIC) sendEventsToAll();
+};
+
+setInterval(updateAll, STREAM_API_REFRESH_TIME);
+updateAll();
 
 /**
  * GET Route for AirTime infos
