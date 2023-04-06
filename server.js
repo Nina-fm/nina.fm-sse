@@ -6,12 +6,11 @@ import express from "express";
 
 dotenv.config();
 
-const {
-  API_PORT,
-  STREAM_API_REFRESH_TIME,
-  STREAM_API_URL,
-  STREAM_API_URL_FALLBACK,
-} = process.env;
+const STREAM_API_REFRESH_TIME = 1000;
+const STREAM_API_URL = "https://prog.nina.fm/api/live-info";
+const STREAM_API_URL_FALLBACK = "http://flux.nina.fm/status-json.xsl";
+
+const { PORT } = process.env;
 
 const app = express();
 
@@ -23,9 +22,9 @@ app.get("/status", (request, response) =>
   response.json({ clients: clients.length })
 );
 
-app.listen(API_PORT, () => {
+app.listen(PORT, () => {
   console.log(":: AIRTIME EVENTS SERVICE ::");
-  console.log(`(Listening at http://localhost:${API_PORT})`);
+  console.log(`(Listening at http://localhost:${PORT})`);
 });
 
 /**
