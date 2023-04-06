@@ -64,7 +64,7 @@ const updateAirTime = async () => {
   const { schedulerTime, ...response } = data;
   if (!isDeepEqual(response, airTimeData)) {
     airTimeData = response;
-    console.log("update airTimeData");
+    // console.log("update airTimeData");
     return true;
   }
   return false;
@@ -76,7 +76,7 @@ const updateIceCast = async () => {
 
   if (!isDeepEqual(response, iceCastData)) {
     iceCastData = response;
-    console.log("update iceCastData");
+    // console.log("update iceCastData");
 
     return true;
   }
