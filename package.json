@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "./node_modules/nodemon/bin/nodemon.js server.js",
-    "start": "node server.js",
+    "start": "node --harmony server.js",
     "deploy": "git push gandi main:master && ssh 1056637@git.dc2.gpaas.net deploy sse.nina.fm.git"
   },
   "dependencies": {
