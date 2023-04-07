@@ -8,7 +8,7 @@ const STREAM_API_REFRESH_TIME = 5000;
 const STREAM_API_URL = "https://prog.nina.fm/api/live-info";
 const STREAM_API_URL_FALLBACK = "http://flux.nina.fm/status-json.xsl";
 
-const { PORT } = process.env;
+const { PORT = 3000 } = process.env;
 
 const app = express();
 
