@@ -1,10 +1,9 @@
+import "dotenv/config";
+
 import axios from "axios";
 import bodyParser from "body-parser";
 import cors from "cors";
-import dotenv from "dotenv";
 import express from "express";
-
-dotenv.config();
 
 const STREAM_API_REFRESH_TIME = 1000;
 const STREAM_API_URL = "https://prog.nina.fm/api/live-info";
