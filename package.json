@@ -1,7 +1,6 @@
 {
   "name": "sse-server",
   "version": "1.0.0",
-  "type": "module",
   "license": "MIT",
   "scripts": {
     "dev": "./node_modules/nodemon/bin/nodemon.js server.js",
