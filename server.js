@@ -29,7 +29,7 @@ app.get("/status", (request, response) =>
 );
 
 app.listen(PORT, () => {
-  console.log(":: AIRTIME EVENTS SERVICE ::");
+  console.log(":: NINA.FM SSE SERVICE ::");
   console.log(`(Listening at http://localhost:${PORT})`);
 });
 
