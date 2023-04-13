@@ -4,7 +4,7 @@ const cors = require("cors");
 const express = require("express");
 require("dotenv").config();
 
-const STREAM_API_REFRESH_TIME = 5000;
+const STREAM_API_REFRESH_TIME = 3000;
 const STREAM_API_URL = "https://prog.nina.fm/api/live-info";
 const STREAM_API_URL_FALLBACK = "http://flux.nina.fm/status-json.xsl";
 
