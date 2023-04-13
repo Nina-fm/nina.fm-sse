@@ -2,6 +2,7 @@ const axios = require("axios");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const express = require("express");
+const luxon = require("luxon");
 require("dotenv").config();
 
 const STREAM_API_REFRESH_TIME = 3000;
@@ -17,7 +18,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.get("/status", (request, response) =>
-  response.json({ clients: clients.length })
+  response.json({ dataClients: dataClients.length })
 );
 
 app.listen(PORT, () => {
@@ -28,15 +29,21 @@ app.listen(PORT, () => {
 /**
  * App vars
  */
-let clients = [];
+let dataClients = [];
 let airTimeData = {};
 let iceCastData = {};
+
+let progressClients = [];
+let progress;
 
 /**
  * Utility functions
  */
 const isDeepEqual = (obj1, obj2) =>
   JSON.stringify(obj1) === JSON.stringify(obj2);
+
+const parseAirTimeDate = (date) =>
+  DateTime.fromFormat(date.replace(/\.\d+$/, ""), "yyyy-MM-dd HH:mm:ss");
 
 const getData = () => {
   return {
@@ -47,6 +54,10 @@ const getData = () => {
 
 const getResponse = () => {
   return `data: ${JSON.stringify(getData())}\n\n`;
+};
+
+const getProgressResponse = () => {
+  return `data: ${progress}\n\n`;
 };
 
 const updateAirTime = async () => {
@@ -78,11 +89,38 @@ const updateIceCast = async () => {
   return false;
 };
 
+const updateProgress = () => {
+  if (airTimeData.value) {
+    const schedulerTime = parseAirTimeDate(airTimeData.value?.schedulerTime);
+    const currentStarts = parseAirTimeDate(airTimeData.value.current.starts);
+    const currentEnds = parseAirTimeDate(airTimeData.value.current.ends);
+    const timezoneOffset = Number(airTimeData.value.timezoneOffset);
+    const timeElapsed =
+      schedulerTime.diff(currentStarts, "milliseconds").milliseconds -
+      timezoneOffset * 1000;
+    const trackLength = currentEnds.diff(
+      currentStarts,
+      "milliseconds"
+    ).milliseconds;
+    progress = (timeElapsed * 100) / trackLength;
+  } else {
+    progress = 0;
+  }
+};
+
 const sendEventsToAll = () => {
-  clients.forEach((client) => client.response.write(getResponse()));
+  dataClients.forEach((client) => client.response.write(getResponse()));
+};
+
+const sendProgressToAll = () => {
+  progressClients.forEach((client) =>
+    client.response.write(getProgressResponse())
+  );
 };
 
 const updateAll = async () => {
+  sendProgressToAll();
+
   const updateIC = await updateIceCast();
   if (updateIC) sendEventsToAll();
 };
@@ -90,16 +128,40 @@ const updateAll = async () => {
 setInterval(updateAll, STREAM_API_REFRESH_TIME);
 updateAll();
 
+const headers = {
+  "Content-Type": "text/event-stream",
+  Connection: "keep-alive",
+  "Cache-Control": "no-cache",
+  "X-Accel-Buffering": "no",
+};
+
 /**
  * GET Route for AirTime infos
  */
-const eventsHandler = (request, response, next) => {
-  const headers = {
-    "Content-Type": "text/event-stream",
-    Connection: "keep-alive",
-    "Cache-Control": "no-cache",
-    "X-Accel-Buffering": "no",
+app.get("/progress", (request, response, next) => {
+  response.writeHead(200, headers);
+  response.write(getProgressResponse());
+
+  const clientId = Date.now();
+  const newClient = {
+    id: clientId,
+    response,
   };
+
+  progressClients.push(newClient);
+
+  request.on("close", () => {
+    console.log(`${clientId} Connection closed`);
+    progressClients = progressClients.filter(
+      (client) => client.id !== clientId
+    );
+  });
+});
+
+/**
+ * GET Route for AirTime infos
+ */
+app.get("/events", (request, response, next) => {
   response.writeHead(200, headers);
   response.write(getResponse());
 
@@ -109,12 +171,10 @@ const eventsHandler = (request, response, next) => {
     response,
   };
 
-  clients.push(newClient);
+  dataClients.push(newClient);
 
   request.on("close", () => {
     console.log(`${clientId} Connection closed`);
-    clients = clients.filter((client) => client.id !== clientId);
+    dataClients = dataClients.filter((client) => client.id !== clientId);
   });
-};
-
-app.get("/events", eventsHandler);
+});
