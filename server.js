@@ -2,7 +2,7 @@ const axios = require("axios");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const express = require("express");
-const luxon = require("luxon");
+const { DateTime } = require("luxon");
 require("dotenv").config();
 
 const STREAM_API_REFRESH_TIME = 3000;
