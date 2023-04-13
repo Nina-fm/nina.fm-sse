@@ -128,10 +128,9 @@ const sendProgressToAll = () => {
 };
 
 const updateAll = async () => {
-  updateProgress();
-
   const updateIC = await updateIceCast();
   if (updateIC) sendEventsToAll();
+  updateProgress();
 };
 
 setInterval(updateAll, STREAM_API_REFRESH_TIME);
