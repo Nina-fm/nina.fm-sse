@@ -2,6 +2,7 @@
   "name": "nina.fm-sse",
   "version": "1.0.0",
   "license": "MIT",
+  "main": "server.js",
   "scripts": {
     "dev": "./node_modules/nodemon/bin/nodemon.js server.js",
     "start": "node server.js"

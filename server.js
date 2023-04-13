@@ -40,15 +40,13 @@ const isDeepEqual = (obj1, obj2) =>
 
 const getData = () => {
   return {
-    data: {
-      iceCast: iceCastData,
-      airTime: airTimeData,
-    },
+    iceCast: iceCastData,
+    airTime: airTimeData,
   };
 };
 
 const getResponse = () => {
-  return `${JSON.stringify(getData())}\n\n`;
+  return `data: ${JSON.stringify(getData())}\n\n`;
 };
 
 const updateAirTime = async () => {
@@ -60,7 +58,7 @@ const updateAirTime = async () => {
 
   const { schedulerTime, ...response } = data;
   if (!isDeepEqual(response, airTimeData)) {
-    airTimeData = response;
+    airTimeData = data;
     return true;
   }
   return false;
@@ -100,6 +98,7 @@ const eventsHandler = (request, response, next) => {
     "Content-Type": "text/event-stream",
     Connection: "keep-alive",
     "Cache-Control": "no-cache",
+    "X-Accel-Buffering": "no",
   };
   response.writeHead(200, headers);
   response.write(getResponse());
