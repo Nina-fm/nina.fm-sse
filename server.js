@@ -74,6 +74,8 @@ const updateAirTime = async () => {
     return true;
   }
 
+  updateProgress(data);
+
   const { schedulerTime, ...response } = data;
   if (!isDeepEqual(response, airTimeData)) {
     airTimeData = data;
@@ -88,21 +90,19 @@ const updateIceCast = async () => {
 
   if (!isDeepEqual(response, iceCastData)) {
     iceCastData = response;
-    await updateAirTime();
-
     return true;
   }
 
   return false;
 };
 
-const updateProgress = () => {
-  console.log("airTimeData", { schedulerTime: airTimeData.schedulerTime });
-  if (airTimeData.schedulerTime) {
-    const schedulerTime = parseAirTimeDate(airTimeData.schedulerTime);
-    const currentStarts = parseAirTimeDate(airTimeData.current.starts);
-    const currentEnds = parseAirTimeDate(airTimeData.current.ends);
-    const timezoneOffset = Number(airTimeData.timezoneOffset);
+const updateProgress = (data) => {
+  console.log("airTimeData", { schedulerTime: data.schedulerTime });
+  if (data.schedulerTime) {
+    const schedulerTime = parseAirTimeDate(data.schedulerTime);
+    const currentStarts = parseAirTimeDate(data.current.starts);
+    const currentEnds = parseAirTimeDate(data.current.ends);
+    const timezoneOffset = Number(data.timezoneOffset);
     const timeElapsed =
       schedulerTime.diff(currentStarts, "milliseconds").milliseconds -
       timezoneOffset * 1000;
@@ -129,8 +129,8 @@ const sendProgressToAll = () => {
 
 const updateAll = async () => {
   const updateIC = await updateIceCast();
+  await updateAirTime();
   if (updateIC) sendEventsToAll();
-  updateProgress();
 };
 
 setInterval(updateAll, STREAM_API_REFRESH_TIME);
