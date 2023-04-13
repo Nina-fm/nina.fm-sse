@@ -11,6 +11,13 @@ const STREAM_API_URL_FALLBACK = "http://flux.nina.fm/status-json.xsl";
 
 const { PORT = 3000 } = process.env;
 
+const headers = {
+  "Content-Type": "text/event-stream",
+  Connection: "keep-alive",
+  "Cache-Control": "no-cache",
+  "X-Accel-Buffering": "no",
+};
+
 const app = express();
 
 app.use(cors());
@@ -119,6 +126,7 @@ const sendProgressToAll = () => {
 };
 
 const updateAll = async () => {
+  updateProgress();
   sendProgressToAll();
 
   const updateIC = await updateIceCast();
@@ -127,13 +135,6 @@ const updateAll = async () => {
 
 setInterval(updateAll, STREAM_API_REFRESH_TIME);
 updateAll();
-
-const headers = {
-  "Content-Type": "text/event-stream",
-  Connection: "keep-alive",
-  "Cache-Control": "no-cache",
-  "X-Accel-Buffering": "no",
-};
 
 /**
  * GET Route for AirTime infos
