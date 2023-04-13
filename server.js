@@ -90,11 +90,11 @@ const updateIceCast = async () => {
 };
 
 const updateProgress = () => {
-  if (airTimeData.value) {
-    const schedulerTime = parseAirTimeDate(airTimeData.value?.schedulerTime);
-    const currentStarts = parseAirTimeDate(airTimeData.value.current.starts);
-    const currentEnds = parseAirTimeDate(airTimeData.value.current.ends);
-    const timezoneOffset = Number(airTimeData.value.timezoneOffset);
+  if (airTimeData) {
+    const schedulerTime = parseAirTimeDate(airTimeData?.schedulerTime);
+    const currentStarts = parseAirTimeDate(airTimeData.current.starts);
+    const currentEnds = parseAirTimeDate(airTimeData.current.ends);
+    const timezoneOffset = Number(airTimeData.timezoneOffset);
     const timeElapsed =
       schedulerTime.diff(currentStarts, "milliseconds").milliseconds -
       timezoneOffset * 1000;
