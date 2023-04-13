@@ -97,6 +97,7 @@ const updateIceCast = async () => {
 };
 
 const updateProgress = () => {
+  console.log("airTimeData", { schedulerTime: airTimeData.schedulerTime });
   if (airTimeData.schedulerTime) {
     const schedulerTime = parseAirTimeDate(airTimeData.schedulerTime);
     const currentStarts = parseAirTimeDate(airTimeData.current.starts);
