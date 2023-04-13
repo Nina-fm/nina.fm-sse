@@ -113,6 +113,7 @@ const updateProgress = () => {
   } else {
     progress = 0;
   }
+  sendProgressToAll();
 };
 
 const sendEventsToAll = () => {
@@ -127,7 +128,6 @@ const sendProgressToAll = () => {
 
 const updateAll = async () => {
   updateProgress();
-  sendProgressToAll();
 
   const updateIC = await updateIceCast();
   if (updateIC) sendEventsToAll();
