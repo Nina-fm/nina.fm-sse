@@ -97,8 +97,8 @@ const updateIceCast = async () => {
 };
 
 const updateProgress = () => {
-  if (airTimeData) {
-    const schedulerTime = parseAirTimeDate(airTimeData?.schedulerTime);
+  if (airTimeData.schedulerTime) {
+    const schedulerTime = parseAirTimeDate(airTimeData.schedulerTime);
     const currentStarts = parseAirTimeDate(airTimeData.current.starts);
     const currentEnds = parseAirTimeDate(airTimeData.current.ends);
     const timezoneOffset = Number(airTimeData.timezoneOffset);
