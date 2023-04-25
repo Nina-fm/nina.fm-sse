@@ -126,8 +126,10 @@ const updateProgress = (data) => {
 };
 
 const updateListeners = (data) => {
-  listeners = data;
-  sendListenersToAll();
+  if (data !== listeners) {
+    listeners = data;
+    sendListenersToAll();
+  }
 };
 
 const sendEventsToAll = () => {
