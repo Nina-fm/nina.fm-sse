@@ -43,6 +43,9 @@ let iceCastData = {};
 let progressClients = [];
 let progress;
 
+let listenersClients = [];
+let listeners;
+
 /**
  * Utility functions
  */
@@ -67,6 +70,10 @@ const getProgressResponse = () => {
   return `data: ${progress}\n\n`;
 };
 
+const getListenersResponse = () => {
+  return `data: ${listeners}\n\n`;
+};
+
 const updateAirTime = async () => {
   const { data, error } = await axios.get(STREAM_API_URL);
   if (error) {
@@ -86,7 +93,9 @@ const updateAirTime = async () => {
 
 const updateIceCast = async () => {
   const { data } = await axios.get(STREAM_API_URL_FALLBACK);
-  const response = data.icestats.source;
+  const { listeners, ...response } = data.icestats.source;
+
+  updateListeners(listeners);
 
   if (!isDeepEqual(response, iceCastData)) {
     iceCastData = response;
@@ -97,7 +106,6 @@ const updateIceCast = async () => {
 };
 
 const updateProgress = (data) => {
-  console.log("airTimeData", { schedulerTime: data.schedulerTime });
   if (data.schedulerTime) {
     const schedulerTime = parseAirTimeDate(data.schedulerTime);
     const currentStarts = parseAirTimeDate(data.current.starts);
@@ -117,6 +125,11 @@ const updateProgress = (data) => {
   sendProgressToAll();
 };
 
+const updateListeners = (data) => {
+  listeners = data;
+  sendListenersToAll();
+};
+
 const sendEventsToAll = () => {
   dataClients.forEach((client) => client.response.write(getResponse()));
 };
@@ -127,17 +140,49 @@ const sendProgressToAll = () => {
   );
 };
 
+const sendListenersToAll = () => {
+  listenersClients.forEach((client) =>
+    client.response.write(getListenersResponse())
+  );
+};
+
 const updateAll = async () => {
   const updateIC = await updateIceCast();
   await updateAirTime();
-  if (updateIC) sendEventsToAll();
+  if (updateIC) {
+    sendEventsToAll();
+    sendListenersToAll();
+  }
 };
 
 setInterval(updateAll, STREAM_API_REFRESH_TIME);
 updateAll();
 
 /**
- * GET Route for AirTime infos
+ * GET Route for listeners info
+ */
+app.get("/listeners", (request, response, next) => {
+  response.writeHead(200, headers);
+  response.write(getListenersResponse());
+
+  const clientId = Date.now();
+  const newClient = {
+    id: clientId,
+    response,
+  };
+
+  listenersClients.push(newClient);
+
+  request.on("close", () => {
+    console.log(`${clientId} Connection closed`);
+    listenersClients = listenersClients.filter(
+      (client) => client.id !== clientId
+    );
+  });
+});
+
+/**
+ * GET Route for progress info
  */
 app.get("/progress", (request, response, next) => {
   response.writeHead(200, headers);
