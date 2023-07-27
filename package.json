@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "dev": "./node_modules/nodemon/bin/nodemon.js server.js",
+    "dev:mock": "MOCK=true ./node_modules/nodemon/bin/nodemon.js server.js",
     "start": "node server.js",
     "pm2": "pm2 restart ecosystem.config.js"
   },

@@ -5,6 +5,13 @@ const express = require("express");
 const { DateTime } = require("luxon");
 require("dotenv").config();
 
+const MOCK_REFRESH_TIME = 15000;
+const MOCK_STRINGS = [
+  "120 - Route 120", // MIXTAPE
+  "Ben Harper - Homeless Child", // TRACK
+  "Hagi - Tribulation", // MIXTAPE
+];
+
 const STREAM_API_REFRESH_TIME = 3000;
 const STREAM_API_URL = "https://prog.nina.fm/api/live-info";
 const STREAM_API_URL_FALLBACK = "http://flux.nina.fm/status-json.xsl";
@@ -36,6 +43,8 @@ app.listen(PORT, () => {
 /**
  * App vars
  */
+let mockIndex = 0;
+
 let dataClients = [];
 let airTimeData = {};
 let iceCastData = {};
@@ -74,7 +83,18 @@ const getListenersResponse = () => {
   return `data: ${listeners}\n\n`;
 };
 
-const updateAirTime = async () => {
+const updateAirTime = async (mockString = undefined) => {
+  if (mockString) {
+    airTimeData = {
+      ...airTimeData,
+      current: {
+        name: mockString,
+      },
+    };
+
+    return true;
+  }
+
   const { data, error } = await axios.get(STREAM_API_URL);
   if (error) {
     airTimeData = {};
@@ -157,8 +177,23 @@ const updateAll = async () => {
   }
 };
 
-setInterval(updateAll, STREAM_API_REFRESH_TIME);
-updateAll();
+const updateAllMock = async () => {
+  const updateIC = await updateIceCast();
+  await updateAirTime(MOCK_STRINGS[mockIndex]);
+  mockIndex = mockIndex === MOCK_STRINGS.length - 1 ? 0 : mockIndex + 1;
+  sendEventsToAll();
+  if (updateIC) {
+    sendListenersToAll();
+  }
+};
+
+if (process.env.MOCK) {
+  setInterval(updateAllMock, MOCK_REFRESH_TIME);
+  updateAllMock();
+} else {
+  setInterval(updateAll, STREAM_API_REFRESH_TIME);
+  updateAll();
+}
 
 /**
  * GET Route for listeners info
