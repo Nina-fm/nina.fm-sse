@@ -4,9 +4,10 @@
   "license": "MIT",
   "main": "server.js",
   "scripts": {
-    "dev": "./node_modules/nodemon/bin/nodemon.js server.js",
-    "dev:mock": "MOCK=true ./node_modules/nodemon/bin/nodemon.js server.js",
-    "start": "node server.js",
+    "dev": "nodemon src/server.ts",
+    "dev:mock": "MOCK=true nodemon src/server.ts",
+    "start": "node dist/server.js",
+    "build": "npx tsc",
     "pm2": "pm2 restart ecosystem.config.js"
   },
   "dependencies": {
@@ -15,9 +16,20 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "luxon": "^3.3.0"
+    "luxon": "^3.3.0",
+    "module-alias": "^2.2.3"
   },
   "devDependencies": {
-    "nodemon": "^2.0.22"
-  }
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/luxon": "^3.6.0",
+    "nodemon": "^2.0.22",
+    "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.8.2"
+  },
+  "_moduleAliases": {
+    "@": "./dist"
+  },
+  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nina.fm SSE</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+
+<body class="py-8 px-10 flex flex-col gap-4">
+    <header>
+        <h1 class="text-3xl font-bold">Nina.fm SSE</h1>
+        <p class="text-sm text-gray-500">Welcome to the Nina.fm push data service.</p>
+    </header>
+    <main class="flex flex-col gap-5">
+        <h2 class="font-bold">Available Endpoints</h2>
+        <ul class="flex flex-col gap-8">
+            <li class="flex flex-col gap-2">
+                <span class="font-bold leading-1">/status</span>
+                <span class="text-sm text-gray-600">Current clients connected to SSE</span>
+                <a href="/status"
+                    class="text-xs uppercase bg-gray-700 hover:bg-gray-500 px-3 py-2 text-gray-200 rounded-md w-fit">
+                    status
+                </a>
+            </li>
+            <li class="flex flex-col gap-2">
+                <span class="font-bold leading-1">/events</span>
+                <span class="text-sm text-gray-600">Infos data about current audio stream</span>
+                <a href="/events"
+                    class="text-xs uppercase bg-gray-700 hover:bg-gray-500 px-3 py-2 text-gray-200 rounded-md w-fit">
+                    events
+                </a>
+            </li>
+            <li class="flex flex-col gap-2">
+                <span class="font-bold leading-1">/progress</span>
+                <span class="text-sm text-gray-600">Playing time progression of current audio track</span>
+                <a href="/progress"
+                    class="text-xs uppercase bg-gray-700 hover:bg-gray-500 px-3 py-2 text-gray-200 rounded-md w-fit">
+                    progress
+                </a>
+            </li>
+            <li class="flex flex-col gap-2">
+                <span class="font-bold leading-1">/listeners</span>
+                <span class="text-sm text-gray-600">Count of current audio stream listeners</span>
+                <a href="/listeners"
+                    class="text-xs uppercase bg-gray-700 hover:bg-gray-500 px-3 py-2 text-gray-200 rounded-md w-fit">
+                    listeners
+                </a>
+            </li>
+        </ul>
+    </main>
+</body>
+
+</html>
