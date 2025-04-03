@@ -1,4 +1,4 @@
-import { DataService } from "@lib/data.service";
+import { DataService } from '@lib/data.service';
 
 type Events = {
   icecast: Partial<IceCastSource>;

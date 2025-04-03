@@ -1,7 +1,7 @@
 declare global {
-  type Environment = "production" | "staging" | "development";
+  type Environment = 'production' | 'staging' | 'development';
 
-  type TrackType = "track" | "show";
+  type TrackType = 'track' | 'show';
 
   interface Block {
     name: string;

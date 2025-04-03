@@ -1,11 +1,11 @@
-import { DataApi } from "@lib/data.api";
-import axios from "axios";
-import { isDeepStrictEqual } from "node:util";
+import { DataApi } from '@lib/data.api';
+import axios from 'axios';
+import { isDeepStrictEqual } from 'node:util';
 
 export class IceCastDataApi extends DataApi<IceCastSource> {
   constructor() {
     super();
-    this.url = process.env.STREAM_API_URL_FALLBACK || "";
+    this.url = process.env.STREAM_API_URL_FALLBACK || '';
   }
 
   async fetchData() {

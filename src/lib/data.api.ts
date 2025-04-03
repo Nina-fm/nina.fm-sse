@@ -1,5 +1,5 @@
 export class DataApi<Type> {
-  protected _url: string = "";
+  protected _url: string = '';
   protected _data: Partial<Type> = {};
 
   constructor() {}

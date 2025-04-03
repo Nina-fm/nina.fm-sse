@@ -1,5 +1,5 @@
-import { Response } from "express";
-import { isDeepStrictEqual } from "node:util";
+import { Response } from 'express';
+import { isDeepStrictEqual } from 'node:util';
 
 export class DataService<Type> {
   protected _clients: Client[] = [];
@@ -29,7 +29,7 @@ export class DataService<Type> {
   }
 
   get response() {
-    const data = ["object", "array"].includes(typeof this.value)
+    const data = ['object', 'array'].includes(typeof this.value)
       ? JSON.stringify(this.value)
       : this.value;
 

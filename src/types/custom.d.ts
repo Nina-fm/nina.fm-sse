@@ -1,4 +1,5 @@
-import { Response } from "express";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Response } from 'express';
 
 declare global {
   interface Client {
