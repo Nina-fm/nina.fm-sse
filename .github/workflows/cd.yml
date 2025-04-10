@@ -32,6 +32,6 @@ jobs:
             cd /var/www/html/nina.fm-sse
             git checkout main -f
             git pull origin main
-            yarn install
-            yarn build
-            yarn pm2:restart
+            npm run install
+            npm run build
+            npm run pm2:restart
