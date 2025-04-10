@@ -29,6 +29,8 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           port: 22
           script: |
+            export NVM_DIR=/home/${{ secrets.USERNAME }}/.nvm
+            source /home/${{ secrets.USERNAME }}/.nvm/nvm.sh
             cd /var/www/html/nina.fm-sse
             git checkout main -f
             git pull origin main
