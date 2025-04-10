@@ -5,11 +5,8 @@ import { AirTimeDataApi } from 'api/airtime';
 import { IceCastDataApi } from 'api/icecast';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import express, { Application, Request, Response } from 'express';
 import serverConfig from './server.config';
-
-dotenv.config();
 
 /**
  * Initialize Express
