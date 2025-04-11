@@ -1,6 +1,7 @@
 export class DataApi<Type> {
   protected _url: string = '';
   protected _data: Partial<Type> = {};
+  protected _filteredData: Partial<Type> = {};
 
   constructor() {}
 
@@ -18,5 +19,13 @@ export class DataApi<Type> {
 
   get data(): Partial<Type> {
     return this._data;
+  }
+
+  set filteredData(filteredData: Partial<Type>) {
+    this._filteredData = filteredData;
+  }
+
+  get filteredData(): Partial<Type> {
+    return this._filteredData;
   }
 }

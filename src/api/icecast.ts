@@ -9,7 +9,7 @@ export class IceCastDataApi extends DataApi<IceCastSource> {
     this.url = process.env.STREAM_API_URL_FALLBACK || '';
   }
 
-  _checkableData(data: Partial<IceCastSource>) {
+  _parseFilteredData(data: Partial<IceCastSource>) {
     const { listeners, listener_peak, ...rest } = data;
     return rest;
   }
@@ -31,18 +31,17 @@ export class IceCastDataApi extends DataApi<IceCastSource> {
 
     if (
       isDeepStrictEqual(
-        this._checkableData(this.data),
-        this._checkableData(response),
+        this._parseFilteredData(this.data),
+        this._parseFilteredData(response),
       )
     ) {
-      return false;
+      this.data = this._parseFilteredData(response);
     }
 
-    this.data = response;
-    return true;
+    this.filteredData = response;
   }
 
   get listeners() {
-    return this.data.listeners ?? 0;
+    return this.filteredData.listeners ?? 0;
   }
 }

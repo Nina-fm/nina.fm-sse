@@ -4,8 +4,6 @@ import axios from 'axios';
 import { isDeepStrictEqual } from 'node:util';
 
 export class AirTimeDataApi extends DataApi<AirTimeResponse> {
-  private _filteredData: Partial<AirTimeResponse> = {};
-
   constructor() {
     super();
     this.url = process.env.STREAM_API_URL || '';
@@ -28,20 +26,20 @@ export class AirTimeDataApi extends DataApi<AirTimeResponse> {
       this.data = this._parseFilteredData(data);
     }
 
-    this._filteredData = data;
+    this.filteredData = data;
   }
 
   get progress() {
-    if (!this._filteredData.schedulerTime) return 0;
+    if (!this.filteredData.schedulerTime) return 0;
 
-    const schedulerTime = parseAirTimeDate(this._filteredData.schedulerTime);
+    const schedulerTime = parseAirTimeDate(this.filteredData.schedulerTime);
     const currentStarts = parseAirTimeDate(
-      this._filteredData?.current?.starts ?? '',
+      this.filteredData?.current?.starts ?? '',
     );
     const currentEnds = parseAirTimeDate(
-      this._filteredData?.current?.ends ?? '',
+      this.filteredData?.current?.ends ?? '',
     );
-    const timezoneOffset = Number(this._filteredData.timezoneOffset);
+    const timezoneOffset = Number(this.filteredData.timezoneOffset);
     const timeElapsed =
       schedulerTime.diff(currentStarts, 'milliseconds').milliseconds -
       timezoneOffset * 1000;
