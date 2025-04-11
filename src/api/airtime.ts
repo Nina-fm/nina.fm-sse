@@ -9,12 +9,20 @@ export class AirTimeDataApi extends DataApi<AirTimeResponse> {
     this.url = process.env.STREAM_API_URL || '';
   }
 
+  _checkableData(data: Partial<AirTimeResponse>) {
+    const { schedulerTime, ...rest } = data;
+    return rest;
+  }
+
   async fetchData() {
     const { data } = await axios.get<AirTimeResponse>(this.url);
-    const { schedulerTime, ...response } = data;
-    const { schedulerTime: _, ...storedData } = this.data;
 
-    if (isDeepStrictEqual(storedData, response)) {
+    if (
+      isDeepStrictEqual(
+        this._checkableData(this.data),
+        this._checkableData(data),
+      )
+    ) {
       return false;
     }
 

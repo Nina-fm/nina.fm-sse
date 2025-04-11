@@ -24,7 +24,7 @@ declare global {
     server_id: string;
     server_start: string;
     server_start_iso8601: string;
-    source: IceCastSource;
+    source: IceCastSource | IceCastSource[];
   }
 
   interface IceCastResponse {
