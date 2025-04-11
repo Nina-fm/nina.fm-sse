@@ -12,8 +12,9 @@ export class AirTimeDataApi extends DataApi<AirTimeResponse> {
   async fetchData() {
     const { data } = await axios.get<AirTimeResponse>(this.url);
     const { schedulerTime, ...response } = data;
+    const { schedulerTime: _, ...storedData } = this.data;
 
-    if (isDeepStrictEqual(this.data, response)) {
+    if (isDeepStrictEqual(storedData, response)) {
       return false;
     }
 
