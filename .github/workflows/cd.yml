@@ -29,11 +29,11 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           port: 22
           script: |
-            source ~/_profile
-            cdnvm ~/apps/nina.fm-sse
+            bash -i
+            cd ~/apps/nina.fm-sse
             git checkout main -f
             git reset --hard origin/main
-            git pull origin main
-            npm install
-            npm run build
-            npm run pm2:restart
+            git pull
+            yarn
+            yarn build
+            yarn pm2:restart
