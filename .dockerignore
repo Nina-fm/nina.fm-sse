@@ -1,0 +1,17 @@
+node_modules
+npm-debug.log
+yarn-error.log
+.env
+.env.local
+.env.*.local
+build
+dist
+.git
+.gitignore
+README.md
+.vscode
+.DS_Store
+*.log
+.github
+ecosystem.config.cjs
+test.sh

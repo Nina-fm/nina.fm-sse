@@ -71,6 +71,13 @@ app.get('/', (_request: Request, response: Response) => {
 });
 
 /**
+ * Health check endpoint for Docker
+ */
+app.get('/health', (_request: Request, response: Response) => {
+  response.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+/**
  * GET Route for listeners info
  * @returns {number} number for listeners count
  */
