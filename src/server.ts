@@ -74,7 +74,9 @@ app.get('/', (_request: Request, response: Response) => {
  * Health check endpoint for Docker
  */
 app.get('/health', (_request: Request, response: Response) => {
-  response.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  response
+    .status(200)
+    .json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 /**
