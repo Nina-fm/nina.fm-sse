@@ -70,5 +70,5 @@ ENV PORT=3001
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3001/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1))" || exit 1
 
-# Start the server
-CMD ["node", "-r", "tsconfig-paths/register", "build/server.js"]
+# Start the server (paths already resolved by tsc-alias during build)
+CMD ["node", "build/server.js"]
