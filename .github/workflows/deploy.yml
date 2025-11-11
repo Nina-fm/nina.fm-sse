@@ -1,232 +1,232 @@
 name: Deploy Nina.fm SSE
 
 on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-    inputs:
-      no-cache:
-        description: "Force rebuild without cache"
-        required: false
-        default: "false"
-        type: choice
-        options:
-          - "false"
-          - "true"
+    push:
+        branches: [main]
+    workflow_dispatch:
+        inputs:
+            no-cache:
+                description: "Force rebuild without cache"
+                required: false
+                default: "false"
+                type: choice
+                options:
+                    - "false"
+                    - "true"
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: nina-fm/nina.fm-sse
+    REGISTRY: ghcr.io
+    IMAGE_NAME: nina-fm/nina.fm-sse
 
 jobs:
-  test:
-    name: Run tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    test:
+        name: Run tests
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
 
-      - name: Enable Corepack
-        run: corepack enable
+            - name: Enable Corepack
+              run: corepack enable
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
+            - name: Install dependencies
+              run: yarn install --frozen-lockfile
 
-      - name: Lint
-        run: yarn lint
+            - name: Lint
+              run: yarn lint
 
-      - name: Build
-        run: yarn build
+            - name: Build
+              run: yarn build
 
-  build:
-    name: Build and push Docker image
-    runs-on: ubuntu-latest
-    needs: test
-    permissions:
-      contents: read
-      packages: write
-      id-token: write
+    build:
+        name: Build and push Docker image
+        runs-on: ubuntu-latest
+        needs: test
+        permissions:
+            contents: read
+            packages: write
+            id-token: write
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
 
-      - name: Enable Corepack
-        run: corepack enable
+            - name: Enable Corepack
+              run: corepack enable
 
-      - name: Get package version
-        id: package-version
-        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+            - name: Get package version
+              id: package-version
+              run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
-      - name: Log in to Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+            - name: Log in to Container Registry
+              uses: docker/login-action@v3
+              with:
+                  registry: ${{ env.REGISTRY }}
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr  
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
-          flavor: |
-            latest=auto
-            prefix=
-            suffix=
+            - name: Extract metadata
+              id: meta
+              uses: docker/metadata-action@v5
+              with:
+                  images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+                  tags: |
+                      type=ref,event=branch
+                      type=ref,event=pr  
+                      type=sha,prefix={{branch}}-
+                      type=raw,value=latest,enable={{is_default_branch}}
+                  flavor: |
+                      latest=auto
+                      prefix=
+                      suffix=
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile
-          target: production
-          push: true
-          no-cache: ${{ github.event.inputs.no-cache == 'true' }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+            - name: Build and push Docker image
+              uses: docker/build-push-action@v5
+              with:
+                  context: .
+                  file: ./Dockerfile
+                  target: production
+                  push: true
+                  no-cache: ${{ github.event.inputs.no-cache == 'true' }}
+                  cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
+                  cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+                  tags: ${{ steps.meta.outputs.tags }}
+                  labels: ${{ steps.meta.outputs.labels }}
 
-  deploy:
-    name: Deploy to production server
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.ref == 'refs/heads/main'
+    deploy:
+        name: Deploy to production server
+        runs-on: ubuntu-latest
+        needs: build
+        if: github.ref == 'refs/heads/main'
 
-    steps:
-      - name: Pull Docker image
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.PRIVATE_KEY }}
-          command_timeout: 15m
-          script: |
-            # Login Docker
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            
-            # Pull avec retry
-            echo "📥 Pulling nina-sse image..."
-            for i in 1 2 3; do
-              if docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest; then
-                echo "✅ Pull successful"
-                exit 0
-              else
-                echo "⚠️ Pull attempt $i failed, retrying..."
-                sleep 5
-              fi
-            done
-            echo "❌ Pull failed after 3 attempts"
-            exit 1
+        steps:
+            - name: Pull Docker image
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.SERVER_HOST }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  command_timeout: 15m
+                  script: |
+                      # Login Docker
+                      echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Deploy to server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.PRIVATE_KEY }}
-          command_timeout: 5m
-          script: |
-            # Créer les répertoires
-            mkdir -p /var/nina/sse/deploy
+                      # Pull avec retry
+                      echo "📥 Pulling nina-sse image..."
+                      for i in 1 2 3; do
+                        if docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest; then
+                          echo "✅ Pull successful"
+                          exit 0
+                        else
+                          echo "⚠️ Pull attempt $i failed, retrying..."
+                          sleep 5
+                        fi
+                      done
+                      echo "❌ Pull failed after 3 attempts"
+                      exit 1
 
-            # Créer le fichier d'environnement
-            cat > /var/nina/sse/.env.prod << 'EOF'
-            NODE_ENV=production
-            PORT=3001
-            STREAM_API_URL=${{ vars.STREAM_API_URL }}
-            STREAM_API_URL_FALLBACK=${{ vars.STREAM_API_URL_FALLBACK }}
-            EOF
+            - name: Deploy to server
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.SERVER_HOST }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  command_timeout: 5m
+                  script: |
+                      # Créer les répertoires
+                      mkdir -p /var/nina/sse/deploy
 
-            chmod 600 /var/nina/sse/.env.prod
-            cd /var/nina/sse/deploy
+                      # Créer le fichier d'environnement
+                      cat > /var/nina/sse/.env.prod << 'EOF'
+                      NODE_ENV=production
+                      PORT=3001
+                      STREAM_API_URL=${{ vars.STREAM_API_URL }}
+                      STREAM_API_URL_FALLBACK=${{ vars.STREAM_API_URL_FALLBACK }}
+                      EOF
 
-            # S'assurer que le réseau existe
-            docker network create nina-network 2>/dev/null || echo "Réseau nina-network existe déjà"
+                      chmod 600 /var/nina/sse/.env.prod
+                      cd /var/nina/sse/deploy
 
-            # Créer le docker-compose.yml
-            cat > docker-compose.yml << 'COMPOSE_EOF'
-            services:
-              sse:
-                image: ghcr.io/nina-fm/nina.fm-sse:latest
-                container_name: nina-sse
-                restart: unless-stopped
-                environment:
-                  - NODE_ENV=production
-                  - PORT=3001
-                  - STREAM_API_URL=${STREAM_API_URL}
-                  - STREAM_API_URL_FALLBACK=${STREAM_API_URL_FALLBACK}
-                ports:
-                  - "127.0.0.1:3001:3001"
-                networks:
-                  - nina-network
-                healthcheck:
-                  test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1))"]
-                  interval: 30s
-                  timeout: 3s
-                  retries: 3
-                  start_period: 10s
-                logging:
-                  driver: "json-file"
-                  options:
-                    max-size: "10m"
-                    max-file: "3"
+                      # S'assurer que le réseau existe
+                      docker network create nina-network 2>/dev/null || echo "Réseau nina-network existe déjà"
 
-            networks:
-              nina-network:
-                name: nina-network
-                external: true
-            COMPOSE_EOF
+                      # Créer le docker-compose.yml
+                      cat > docker-compose.yml << 'COMPOSE_EOF'
+                      services:
+                        sse:
+                          image: ghcr.io/nina-fm/nina.fm-sse:latest
+                          container_name: nina-sse
+                          restart: unless-stopped
+                          environment:
+                            - NODE_ENV=production
+                            - PORT=3001
+                            - STREAM_API_URL=${STREAM_API_URL}
+                            - STREAM_API_URL_FALLBACK=${STREAM_API_URL_FALLBACK}
+                          ports:
+                            - "127.0.0.1:3001:3001"
+                          networks:
+                            - nina-network
+                          healthcheck:
+                            test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1))"]
+                            interval: 30s
+                            timeout: 3s
+                            retries: 3
+                            start_period: 10s
+                          logging:
+                            driver: "json-file"
+                            options:
+                              max-size: "10m"
+                              max-file: "3"
 
-            # Arrêter conteneur existant
-            docker stop nina-sse 2>/dev/null || true
-            docker rm nina-sse 2>/dev/null || true
+                      networks:
+                        nina-network:
+                          name: nina-network
+                          external: true
+                      COMPOSE_EOF
 
-            # Déployer
-            echo "🚀 Démarrage conteneur SSE..."
-            docker compose --env-file /var/nina/sse/.env.prod up -d --wait
-            
-            echo "✅ Déploiement SSE terminé"
-            docker ps | grep nina-sse
-            docker logs nina-sse --tail 20
+                      # Arrêter conteneur existant
+                      docker stop nina-sse 2>/dev/null || true
+                      docker rm nina-sse 2>/dev/null || true
 
-  cleanup:
-    name: Cleanup old images
-    runs-on: ubuntu-latest
-    needs: deploy
-    if: github.ref == 'refs/heads/main'
+                      # Déployer
+                      echo "🚀 Démarrage conteneur SSE..."
+                      docker compose --env-file /var/nina/sse/.env.prod up -d --wait
 
-    steps:
-      - name: Cleanup old Docker images
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.PRIVATE_KEY }}
-          command_timeout: 2m
-          script: |
-            echo "🧹 Nettoyage des anciennes images..."
-            docker image prune -f
-            echo "✅ Nettoyage terminé"
+                      echo "✅ Déploiement SSE terminé"
+                      docker ps | grep nina-sse
+                      docker logs nina-sse --tail 20
+
+    cleanup:
+        name: Cleanup old images
+        runs-on: ubuntu-latest
+        needs: deploy
+        if: github.ref == 'refs/heads/main'
+
+        steps:
+            - name: Cleanup old Docker images
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.SERVER_HOST }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  command_timeout: 2m
+                  script: |
+                      echo "🧹 Nettoyage des anciennes images..."
+                      docker image prune -f
+                      echo "✅ Nettoyage terminé"
