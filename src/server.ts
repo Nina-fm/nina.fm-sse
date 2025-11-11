@@ -46,15 +46,19 @@ const events = new EventsDataService();
  */
 
 const update = async () => {
-  await icecast.fetchData();
-  await airtime.fetchData();
+  try {
+    await icecast.fetchData();
+    await airtime.fetchData();
 
-  listeners.value = icecast.listeners;
-  progress.value = airtime.progress;
-  events.value = {
-    icecast: icecast.data,
-    airtime: airtime.data,
-  };
+    listeners.value = icecast.listeners;
+    progress.value = airtime.progress;
+    events.value = {
+      icecast: icecast.data,
+      airtime: airtime.data,
+    };
+  } catch (error) {
+    console.error('Error updating data:', error);
+  }
 };
 
 setInterval(update, serverConfig.refreshInterval);
